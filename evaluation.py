@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.metrics import average_precision_score
+from hashing import compute_binary_hash
 
 def hamming_distance(query_hash, db_hash):
     """
@@ -11,6 +12,12 @@ def calculate_map(query_labels, db_labels, sorted_indices):
     """
     计算mAP（平均精度）。
     """
+
+    # 将标签矩阵转换为布尔类型
+    query_labels = query_labels.astype(bool)
+    db_labels = db_labels.astype(bool)
+
+    # 计算相关性
     relevant = np.sum(query_labels & db_labels, axis=1) > 0
     y_true = relevant[sorted_indices]
     y_score = np.linspace(1, 0, len(y_true))  # 模拟的检索分数

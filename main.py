@@ -13,8 +13,8 @@ if __name__ == "__main__":
     # 数据划分
     query_features = features[:1000]
     query_labels = labels[:1000]
-    db_features = features[1000:]
-    db_labels = labels[1000:]
+    db_features = features[1000:16000]
+    db_labels = labels[1000:16000]
 
     # 参数设置
     bit_lengths = [32, 64, 128]
@@ -26,6 +26,12 @@ if __name__ == "__main__":
 
         # 训练球面哈希
         db_binary_hash, random_planes = train_hashing(db_features, num_bits)
+
+
+        # 检查标签数据结构
+        print(f"query_labels shape: {query_labels.shape}, dtype: {query_labels.dtype}")
+        print(f"db_labels shape: {db_labels.shape}, dtype: {db_labels.dtype}")
+        print(f"query_labels sample: {query_labels[0]}")
 
         # 检索性能评估
         mean_map, mean_recall, mean_precision = evaluate(
@@ -44,3 +50,4 @@ if __name__ == "__main__":
         avg_time = calculate_avg_retrieval_time(compute_binary_hash(query_features, random_planes), db_binary_hash)
         print(f"Storage consumption: {storage:.2f} KB")
         print(f"Average retrieval time: {avg_time:.6f} seconds")
+
