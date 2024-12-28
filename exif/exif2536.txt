@@ -1,0 +1,66 @@
+-Make
+SONY
+-Model
+DSC-W90
+-Orientation
+Horizontal (normal)
+-X-Resolution
+72
+-Y-Resolution
+72
+-Resolution Unit
+Inches
+-Software
+Paint.NET v3.30
+-Date and Time
+2008:04:30 20:28:17
+-YCbCr Positioning
+Co-Sited
+-Exposure
+0.033 sec (1/30)
+-Aperture
+f/2.8
+-Exposure Program
+Normal
+-ISO Speed
+400
+-Date and Time (Original)
+2008:04:30 20:28:17
+-Date and Time (Digitized)
+2008:04:30 20:28:17
+-Compressed Bits per Pixel
+4 bits
+-Exposure Bias
+0/10 EV
+-Maximum Lens Aperture
+48/16
+-Metering Mode
+Pattern
+-Flash
+Flash did not fire
+-Focal Length
+5.8 mm
+-Color Space
+sRGB
+-Pixel X-Dimension
+3264
+-Pixel Y-Dimension
+2176
+-Compression
+JPEG
+-Tag::Sony::0xB020
+æ   ¢ T
+-Tag::Sony::0xB041
+6
+-Tag::Sony::0xB042
+2
+-Tag::Sony::0xB044
+1
+-Tag::Sony::0xB04B
+2
+-Tag::Sony::0xB04C
+427425792/1951596544
+-Tag::Sony::0xA000
+2147483652
+-Tag::Sony::0xA001
+7

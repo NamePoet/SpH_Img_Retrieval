@@ -1,0 +1,58 @@
+-Image Description
+OLYMPUS DIGITAL CAMERA
+-Make
+OLYMPUS IMAGING CORP.
+-Model
+E-500
+-Orientation
+Horizontal (normal)
+-X-Resolution
+1/96
+-Y-Resolution
+1/96
+-Resolution Unit
+Inches
+-Software
+Microsoft Windows Photo Gallery 6.0.6000.16386
+-Date and Time
+2008:02:17 14:58:48
+-YCbCr Positioning
+Co-Sited
+-Exposure
+0.005 sec (1/200)
+-Aperture
+f/5
+-Exposure Program
+Shutter priority
+-ISO Speed
+100
+-Date and Time (Original)
+2008:02:17 11:57:19
+-Date and Time (Digitized)
+2008:02:17 11:57:19
+-Exposure Bias
+0/10 EV
+-Maximum Lens Aperture
+925/256
+-Metering Mode
+Pattern
+-Flash
+Flash did not fire, auto mode
+-Focal Length
+22 mm
+-Color Space
+sRGB
+-Pixel X-Dimension
+2448
+-Pixel Y-Dimension
+3264
+-Digital Zoom Ratio
+100/100
+-Saturation
+High saturation
+-Sharpness
+Hard
+-Tag::EXIF::0xEA1D
+16
+-Compression
+JPEG

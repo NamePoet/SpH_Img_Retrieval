@@ -1,0 +1,94 @@
+-Make
+NIKON
+-Model
+E5600
+-X-Resolution
+72
+-Y-Resolution
+72
+-Resolution Unit
+Inches
+-Software
+E5600v1.0
+-Date and Time
+2007:07:20 15:43:57
+-YCbCr Positioning
+Co-Sited
+-Exposure
+0.02 sec (1/51)
+-Aperture
+f/7.2
+-Exposure Program
+Normal
+-ISO Speed
+50
+-Date and Time (Original)
+2007:07:20 15:43:57
+-Date and Time (Digitized)
+2007:07:20 15:43:57
+-Compressed Bits per Pixel
+4 bits
+-Exposure Bias
+0/167772160 EV
+-Maximum Lens Aperture
+30/10
+-Metering Mode
+Pattern
+-Light Source
+Fine weather
+-Flash
+Flash did not fire
+-Focal Length
+13.6 mm
+-Color Space
+Uncalibrated
+-Pixel X-Dimension
+1944
+-Pixel Y-Dimension
+2592
+-Custom Rendered
+1
+-White Balance
+Manual
+-Digital Zoom Ratio
+0/100
+-Focal Length In 35mm Film
+82
+-Unique Image ID
+fdd5ada64b60b9d9f5b9f131d835d81b
+-Compression
+JPEG
+-Colour Mode
+VIVID
+-Quality
+FINE
+-White Balance
+SUNNY
+-Sharpening
+AUTO
+-Focus Mode
+AF-S
+-Tag::Nikon Type 3::0x000A
+5644/1000
+-ISO Selection
+AUTO
+-Thumbnail IFD Offset
+1142
+-Image Adjustment
+NORMAL
+-Auxiliary Lens (Adapter)
+OFF
+-Manual Focus Distance
+0/0
+-Digital Zoom Factor
+100/100
+-Noise Reduction
+OFF
+-Tag::Nikon Type 3::0x009B
+0, 0
+-Tag::Nikon Type 3::0x00AC
+VR-OFF
+-Tag::Nikon Type 3::0x00AD
+STANDARD
+-By-Line (Author)
+Picasa 2.6

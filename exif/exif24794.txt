@@ -1,0 +1,58 @@
+-Make
+NIKON CORPORATION
+-Model
+NIKON D2Xs
+-Orientation
+Horizontal (normal)
+-X-Resolution
+300
+-Y-Resolution
+300
+-Resolution Unit
+Inches
+-Software
+Adobe Photoshop CS2 Macintosh
+-Date and Time
+2007:03:16 16:38:56
+-Exposure
+0.003 sec (1/400)
+-Aperture
+f/10
+-Exposure Program
+Normal
+-ISO Speed
+100
+-Date and Time (Original)
+2007:02:02 04:31:34
+-Date and Time (Digitized)
+2007:02:02 04:31:34
+-Shutter Speed
+11747/1359
+-Aperture
+9029/1359
+-Exposure Bias
+0 EV
+-Maximum Lens Aperture
+5/1
+-Metering Mode
+Pattern
+-Focal Length
+20 mm
+-Sub-Second Time
+65
+-Sub-Second Time (Original)
+65
+-Sub-Second Time (Digitized)
+65
+-Color Space
+Uncalibrated
+-Pixel X-Dimension
+3984
+-Pixel Y-Dimension
+2848
+-Sensing Method
+One-chip colour area sensor
+-Digital Zoom Ratio
+1/1
+-Focal Length In 35mm Film
+30

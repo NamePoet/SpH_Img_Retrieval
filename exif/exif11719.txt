@@ -1,0 +1,90 @@
+-Image Width
+2000
+-Image Length
+3008
+-Bits per Sample
+16, 16, 16
+-Compression
+JPEG
+-Photometric Interpretation
+2
+-Make
+NIKON CORPORATION
+-Model
+NIKON D70
+-Orientation
+Horizontal (normal)
+-Samples per Pixel
+3
+-X-Resolution
+72
+-Y-Resolution
+72
+-Planar Configuration
+1
+-Resolution Unit
+Inches
+-Software
+Adobe Photoshop CS3 Windows
+-Date and Time
+2007:10:22 22:58:57
+-Copyright
+Â© Toby Keller
+-Exposure
+241 sec (241)
+-Aperture
+f/8
+-Exposure Program
+Manual
+-ISO Speed
+200
+-Date and Time (Original)
+2007:10:22 20:58:59
+-Date and Time (Digitized)
+2007:10:22 20:58:59
+-Shutter Speed
+-7912889/1000000
+-Aperture
+6/1
+-Exposure Bias
+0/6 EV
+-Maximum Lens Aperture
+43/10
+-Metering Mode
+Pattern
+-Focal Length
+11 mm
+-Sub-Second Time (Original)
+80
+-Sub-Second Time (Digitized)
+80
+-Color Space
+sRGB
+-Pixel X-Dimension
+532
+-Pixel Y-Dimension
+800
+-Sensing Method
+One-chip colour area sensor
+-CFA Pattern
+BLUE    GREEN    GREEN   RED
+-Custom Rendered
+1
+-Exposure Mode
+Manual
+-Digital Zoom Ratio
+1/1
+-Focal Length In 35mm Film
+16
+-Contrast
+Hard
+-Saturation
+High saturation
+-Sharpness
+Hard
+-Keywords
+beach, light painting, long exposure, night, santa barbara
+-Copyright Notice
+© Toby Keller
+-Has XMP block
+1
