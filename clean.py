@@ -1,5 +1,6 @@
 import numpy as np
-
+import time
+import matplotlib.pyplot as plt
 
 # 计算紧凑的二值码
 def compactbit(b):
@@ -326,83 +327,204 @@ def calculate_precision_recall_mAP(query_binary, db_binary, query_label, db_labe
     relevance_matrix = (top_k_labels * query_label)  # 每个位置同时为1时，结果为1，否则为0
     relevance = np.any(relevance_matrix == 1, axis=1)  # 逐行判断是否至少有一个维度相关（正匹配）
 
-    # Step 4: 计算 Precision 和 Recall
+    # Step 4: 构建完整的相关性矩阵 (relevance_matrix_recall)
+    # 构建每个查询图像与整个数据库的完整相关性矩阵
+    relevance_matrix_recall = np.zeros((1, db_labels.shape[0]))  # 只有一个查询图像时，矩阵行数为1
+    for db_idx in range(db_labels.shape[0]):  # 遍历数据库图像
+        # 判断数据库图像是否与查询图像相关
+        is_relevant = np.any(query_label * db_labels[db_idx] == 1)
+        relevance_matrix_recall[0, db_idx] = is_relevant
+
+
+    # Step 5: 填充前 k 个相关性矩阵用于 precision 和 mAP 的计算
     retrieved = np.array([top_k_indices])  # 检索的前 k 个图像索引
     relevance_matrix_full = np.zeros((retrieved.shape[0], db_labels.shape[0]))  # 确保相关性矩阵的维度正确
     relevance_matrix_full[:, top_k_indices] = relevance  # 填充相关性矩阵
 
+
+    # Step 6: 计算 Precision, Recall 和 mAP
     precision = precision_at_k(retrieved, relevance_matrix_full, k)
-    recall = recall_at_k(retrieved, relevance_matrix_full, k)
+    recall = recall_at_k(retrieved, relevance_matrix_recall, k)
     mAP = mean_average_precision(retrieved, relevance_matrix_full, k_max=k)
 
     return precision, recall, mAP
 
+# 计算数据库特征存储时间
+def calculate_db_feature_storage_time(db_features, centers, radii, n_bits):
+    start_time = time.time()
+    db_train_features = compute_binary_codes(db_features, centers, radii)
+    db_binary_features = decompressbit(db_train_features, n_bits)  # 解压特征
+    end_time = time.time()
+    return end_time - start_time  # 返回存储时间
+
+
+# 计算查询的平均检索时间
+def calculate_avg_query_time(query_binary, db_binary_features, k_values):
+    query_time_sum = 0.0
+    for query in query_binary:
+        start_time = time.time()
+        compute_hamming_distance(query, db_binary_features)  # 执行检索
+        end_time = time.time()
+        query_time_sum += (end_time - start_time)  # 累加时间
+    avg_query_time = query_time_sum / len(query_binary)  # 求平均时间
+    return avg_query_time
+
+
 
 #########################################################################
 ### 主程序
-# 设置比特长度进行测试
-bit_lengths = [32]       # 32,64,128
+# k 值列表
+k_values = [5] # [20, 50, 100, 300, 500, 1000]
+
+# 测试比特长度
+bit_lengths = [32]   # [32, 64, 128]
+
+# 查询数量列表
+n_query_values = [10] # [10, 100, 500, 1000]
 
 # 固定随机种子以保证结果可复现
 np.random.seed(42)
 
-# 随机选取查询图像的数量
-n_query = 10
+# 初始化存储结果的字典
+results = {
+    n_query: {n_bits: {'precision': [], 'recall': [], 'mAP': [], 'db_storage_time': [], 'avg_query_time': []} for n_bits in bit_lengths}
+    for n_query in n_query_values
+}
 
-# 参数设置
-k = 30  # 前 k 个检索结果
+# 遍历每种查询数量
+for n_query in n_query_values:
+    print(f"\nTesting with n_query = {n_query}:")
 
-for n_bits in bit_lengths:
-    print(f"\nTesting with {n_bits} bits:")
+    for n_bits in bit_lengths:
+        print(f"\n  Testing with {n_bits} bits:")
 
-    # 训练球面哈希
-    centers, radii = spherical_hashing(db_features, n_bits)
+        # 训练球面哈希
+        centers, radii = spherical_hashing(db_features, n_bits)
 
-    # 计算数据库的二值化特征
-    db_train_features = compute_binary_codes(db_features, centers, radii)
-    db_binary_features = decompressbit(db_train_features, n_bits)  # 解压特征
-    db_labels_binary = db_labels  # 数据库的标签
+        # 计算数据库的二值化特征
+        db_train_features = compute_binary_codes(db_features, centers, radii)
+        db_binary_features = decompressbit(db_train_features, n_bits)  # 解压特征
+        db_labels_binary = db_labels  # 数据库的标签
 
-    # 从待查询图像中随机选取 10 张作为查询
-    query_indices = np.random.choice(range(search_features.shape[0]), n_query, replace=False)
+        # 计算数据库特征存储时间
+        db_storage_time = calculate_db_feature_storage_time(db_features, centers, radii, n_bits)
 
-    # 初始化存储结果的列表
-    precision_list = []
-    recall_list = []
-    mAP_list = []
+        # 从待查询图像中随机选取 n_query 张作为查询
+        query_indices = np.random.choice(range(search_features.shape[0]), n_query, replace=False)
 
-    for query_idx in query_indices:
-        # 查询图像的特征和标签
-        query_feature = search_features[query_idx:query_idx + 1]  # 取第 query_idx 张查询图像
-        query_label = search_labels[query_idx]
+        # 计算每个查询的平均检索时间
+        query_binary = [decompressbit(compute_binary_codes(search_features[idx:idx + 1], centers, radii), n_bits)[0] for
+                        idx in query_indices]
+        avg_query_time = calculate_avg_query_time(query_binary, db_binary_features, k_values)
 
-        # 对查询图像进行二值化
-        query_binary = decompressbit(compute_binary_codes(query_feature, centers, radii), n_bits)[0]
+        # 初始化存储每个 k 值下的结果
+        precision_k = []
+        recall_k = []
+        mAP_k = []
 
-        # 检索计算 Precision、Recall 和 mAP
-        precision, recall, mAP = calculate_precision_recall_mAP(query_binary, db_binary_features, query_label, db_labels_binary, k)
+        for k in k_values:
+            precision_list = []
+            recall_list = []
+            mAP_list = []
 
-        # 保存每张查询的结果
-        precision_list.append(precision)
-        recall_list.append(recall)
-        mAP_list.append(mAP)
+            for query_idx in query_indices:
+                # 查询图像的特征和标签
+                query_feature = search_features[query_idx:query_idx + 1]
+                query_label = search_labels[query_idx]
 
-    # 计算随机选取的查询图像的平均 Precision、Recall 和 mAP
-    mean_precision = np.mean(precision_list, axis=0)
-    mean_recall = np.mean(recall_list, axis=0)
-    mean_mAP = np.mean(mAP_list)
+                # 对查询图像进行二值化
+                query_binary = decompressbit(compute_binary_codes(query_feature, centers, radii), n_bits)[0]
 
-    # 输出结果
-    print(f"\n随机选取的 {n_query} 张查询图像的平均 mAP 值: {mean_mAP:.4f}")
-    print(f"随机选取的 {n_query} 张查询图像的平均 Precision 值 (前 {k} 个检索结果): {mean_precision}")
-    print(f"随机选取的 {n_query} 张查询图像的平均 Recall 值 (前 {k} 个检索结果): {mean_recall}")
+                # 检索计算 Precision、Recall 和 mAP
+                precision, recall, mAP = calculate_precision_recall_mAP(query_binary, db_binary_features, query_label, db_labels_binary, k)
 
-    # 检索前 10 个结果（以第一张查询图像为例）
-    example_query_binary = decompressbit(compute_binary_codes(search_features[query_indices[0]:query_indices[0] + 1],
-                                                              centers, radii), n_bits)[0]
-    original_indices = np.arange(len(db_binary_features))
-    sorted_indices, sorted_distances = retrieve_by_hamming(example_query_binary, db_binary_features, original_indices,
-                                                           query_index=query_indices[0])
+                # 保存每张查询的结果
+                precision_list.append(precision)
+                recall_list.append(recall)
+                mAP_list.append(mAP)
+
+            # 计算当前 k 值下的平均 Precision、Recall 和 mAP
+            precision_k.append(np.mean(precision_list) * 100)  # 转为百分比
+            recall_k.append(np.mean(recall_list) * 100)  # 转为百分比
+            mAP_k.append(np.mean(mAP_list) * 100)  # 转为百分比
+
+
+        # 保存每种比特长度下的结果
+        results[n_query][n_bits]['precision'] = precision_k
+        results[n_query][n_bits]['recall'] = recall_k
+        results[n_query][n_bits]['mAP'] = mAP_k
+        results[n_query][n_bits]['db_storage_time'].append(db_storage_time)
+        results[n_query][n_bits]['avg_query_time'].append(avg_query_time)
+
+        print(f"    Results for {n_bits} bits:")
+        print(f"    Precision: {precision_k}")
+        print(f"    Recall: {recall_k}")
+        print(f"    mAP: {mAP_k}")
+        print(f"    Database feature storage time: {db_storage_time} seconds")
+        print(f"    Average query time: {avg_query_time} seconds")
+
+
+# 绘制图像
+for n_query in n_query_values:
+    plt.figure(figsize=(18, 6))
+
+    # 1. Precision 图
+    plt.subplot(1, 3, 1)
+    for n_bits in bit_lengths:
+        plt.plot(k_values, results[n_query][n_bits]['precision'], label=f"{n_bits}-bits", marker='o')
+    plt.title(f"Precision@k (n_query={n_query})")
+    plt.xlabel("k")
+    plt.ylabel("Precision (%)")
+    plt.legend()
+    plt.grid()
+
+    # 2. Recall 图
+    plt.subplot(1, 3, 2)
+    for n_bits in bit_lengths:
+        plt.plot(k_values, results[n_query][n_bits]['recall'], label=f"{n_bits}-bits", marker='o')
+    plt.title(f"Recall@k (n_query={n_query})")
+    plt.xlabel("k")
+    plt.ylabel("Recall (%)")
+    plt.legend()
+    plt.grid()
+
+    # 3. mAP 图
+    plt.subplot(1, 3, 3)
+    for n_bits in bit_lengths:
+        plt.plot(k_values, results[n_query][n_bits]['mAP'], label=f"{n_bits}-bits", marker='o')
+    plt.title(f"mAP@k (n_query={n_query})")
+    plt.xlabel("k")
+    plt.ylabel("mAP (%)")
+    plt.legend()
+    plt.grid()
+
+    plt.tight_layout()
+    plt.show()
+
+    # 4. Database storage time 图
+    #plt.subplot(2, 2, 4)
+    plt.figure(figsize=(9, 6))
+    for n_bits in bit_lengths:
+        plt.plot(k_values, results[n_query][n_bits]['db_storage_time'], label=f"{n_bits}-bits", marker='o')
+    plt.title(f"DB Storage Time (n_query={n_query})")
+    plt.xlabel("k")
+    plt.ylabel("Time (seconds)")
+    plt.legend()
+    plt.grid()
+
+    plt.tight_layout()
+    plt.show()
+
+    # 5. Average query time 图
+    plt.figure(figsize=(9, 6))
+    for n_bits in bit_lengths:
+        plt.plot(k_values, results[n_query][n_bits]['avg_query_time'], label=f"{n_bits}-bits", marker='o')
+    plt.title(f"Avg Query Time (n_query={n_query})")
+    plt.xlabel("k")
+    plt.ylabel("Time (seconds)")
+    plt.legend()
+    plt.grid()
+    plt.show()
 
     # print(f"\n检索结果（前 10 个） for query index {query_indices[0]}:")
     # for i in range(10):
