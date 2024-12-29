@@ -120,7 +120,7 @@ paths = data['arr_2']     # 图像路径，形状为 (16000,)
 labels = data['arr_1']      # 图像标签，形状为 (16000, 38)
 
 
-n_bits = 64  # 二值码长度
+# n_bits = 64  # 二值码长度
 
 # 将数据分为查询集和数据库集 (特征0 路径2 标签1)
 search_features = features[:1000]  # 前1000查询图像
@@ -132,20 +132,13 @@ db_paths = paths[1000:16000]
 search_labels = labels[:1000]      # 前1000查询图像
 db_labels = labels[1000:16000]         # 后15000数据库图像
 
-
-
-
-# 训练球面哈希
-centers, radii = spherical_hashing(db_features, n_bits)
-
-# 计算二值码
-db_train_features = compute_binary_codes(db_features, centers, radii)
-
-# # 输出前 5 个二值化特征
-# print("训练后的前 5 个二值化特征:")
-# for i in range(5):
-#     print(db_train_features[i])
-
+##########################################################################
+# # 训练球面哈希
+# centers, radii = spherical_hashing(db_features, n_bits)
+#
+# # 计算二值码
+# db_train_features = compute_binary_codes(db_features, centers, radii)
+#########################################################################
 
 # 解压缩二值化特征为逐位的 0/1
 def decompressbit(compact_bits, n_bits):
@@ -156,7 +149,7 @@ def decompressbit(compact_bits, n_bits):
     binary_features = np.unpackbits(compact_bits, axis=1)  # 解压到位级别
     return binary_features[:, :n_bits]  # 只保留有效位数
 
-
+#################################################################
 # # 输出二值化特征及其原始特征值
 # print("训练后的前 5 个特征（原始特征值 + 二值化特征）：")
 # for i in range(5):
@@ -172,28 +165,16 @@ def decompressbit(compact_bits, n_bits):
 #
 #     print(f"\n逐位二值化特征[{i}]:")
 #     print(binary_feature)
-
-
-
-# # 计算 Hamming 距离
-# def compute_hamming_distance(query, database):
-#     """
-#     计算查询特征与数据库特征之间的 Hamming 距离
-#     query: 查询图像的二值化特征 (1D numpy array, shape: [n_bits])
-#     database: 数据库的二值化特征 (2D numpy array, shape: [num_samples, n_bits])
-#     返回距离值数组
-#     """
-#     # 按位异或计算差异，再统计 1 的数量
-#     distances = np.sum(query ^ database, axis=1)  # Hamming 距离
-#     return distances
+##################################################################
 
 def compute_hamming_distance(query, database):
     """
     计算查询图像与数据库中所有图像的 Hamming 距离。
+    query: 查询图像的二值化特征 (1D numpy array, shape: [n_bits])
+    database: 数据库的二值化特征 (2D numpy array, shape: [num_samples, n_bits])
+    返回距离值数组
     """
     return np.sum(query != database, axis=1)  # 按位异或
-
-
 
 # 按 Hamming 距离升序排列
 def retrieve_by_hamming(query, database, original_indices, query_index=None):
@@ -215,21 +196,27 @@ def retrieve_by_hamming(query, database, original_indices, query_index=None):
     return original_indices[sorted_indices], distances[sorted_indices]
 
 
+###################################################################################
 # 解压二值化特征
-db_binary_features = decompressbit(db_train_features, n_bits)  # 数据库解压后的二值特征
-
-# 模拟查询
-query_feature = db_binary_features[0]  # 假设使用数据库的第一个图像作为查询图像
-original_indices = np.arange(len(db_binary_features))  # 数据库的图像索引
-
-# 检索
-sorted_indices, sorted_distances = retrieve_by_hamming(query_feature, db_binary_features, original_indices, query_index=0)
-
+# db_binary_features = decompressbit(db_train_features, n_bits)  # 数据库解压后的二值特征
+#
+#
+# # 模拟查询
+# query_feature = db_binary_features[0]  # 假设使用数据库的第一个图像作为查询图像
+# original_indices = np.arange(len(db_binary_features))  # 数据库的图像索引
+#
+# # 检索
+# sorted_indices, sorted_distances = retrieve_by_hamming(query_feature, db_binary_features, original_indices, query_index=0)
+#
 # # 输出前 10 个检索结果
+#
 # print("\n检索结果（前 10 个）：")
 # for i in range(10):
 #     print(f"索引: {sorted_indices[i]}, Hamming 距离: {sorted_distances[i]}")
 
+##################################################################################
+
+####这一步以上完全正确####
 
 # 计算图像相关度
 def compute_relevance(query_idx, sorted_indices, labels, k=10):
@@ -251,7 +238,7 @@ def compute_relevance(query_idx, sorted_indices, labels, k=10):
 
     return relevant_count
 
-
+####################################################################################
 # 测试 compute_relevance 函数
 def test_compute_relevance():
     # 模拟标签数据
@@ -271,9 +258,9 @@ def test_compute_relevance():
     relevant_count = compute_relevance(query_idx, sorted_indices, labels, k=3)
     print(f"查询图像与前 3 个检索结果的相关度数量: {relevant_count}")
 
-
-# 运行测试
 # test_compute_relevance()
+#####################################################################################
+
 
 def precision_at_k(retrieved, relevance, k):
     """
@@ -335,182 +322,26 @@ def calculate_precision_recall_mAP(query_binary, db_binary, query_label, db_labe
     top_k_labels = db_labels[top_k_indices]
 
     # Step 3: 判断相关性
-    relevance = np.any(top_k_labels == query_label, axis=1)  # 任意一列标签相同则相关 (True/False)
+    # 按维度逐位比较，检查是否存在至少一个维度为1
+    relevance_matrix = (top_k_labels * query_label)  # 每个位置同时为1时，结果为1，否则为0
+    relevance = np.any(relevance_matrix == 1, axis=1)  # 逐行判断是否至少有一个维度相关（正匹配）
 
     # Step 4: 计算 Precision 和 Recall
     retrieved = np.array([top_k_indices])  # 检索的前 k 个图像索引
-    relevance_matrix = np.zeros((retrieved.shape[0], db_labels.shape[0]))  # 确保相关性矩阵的维度正确
-    relevance_matrix[:, top_k_indices] = relevance  # 填充相关性矩阵
+    relevance_matrix_full = np.zeros((retrieved.shape[0], db_labels.shape[0]))  # 确保相关性矩阵的维度正确
+    relevance_matrix_full[:, top_k_indices] = relevance  # 填充相关性矩阵
 
-    precision = precision_at_k(retrieved, relevance_matrix, k)
-    recall = recall_at_k(retrieved, relevance_matrix, k)
-    mAP = mean_average_precision(retrieved, relevance_matrix, k_max=k)
+    precision = precision_at_k(retrieved, relevance_matrix_full, k)
+    recall = recall_at_k(retrieved, relevance_matrix_full, k)
+    mAP = mean_average_precision(retrieved, relevance_matrix_full, k_max=k)
 
     return precision, recall, mAP
 
-#
-#
-# def calculate_precision_recall_mAP(query_binary, db_binary, query_label, db_labels, k):
-#     """
-#     计算 Precision, Recall 和 mAP。
-#     """
-#     # Step 1: 计算 Hamming 距离并升序排序
-#     hamming_distances = compute_hamming_distance(query_binary, db_binary)
-#     sorted_indices = np.argsort(hamming_distances)  # 升序排序，返回索引
-#     top_k_indices = sorted_indices[:k]  # 取前 k 个索引
-#
-#     # Step 2: 提取前 k 个图像的标签
-#     top_k_labels = db_labels[top_k_indices]
-#
-#     # Step 3: 判断相关性
-#     relevance = np.any(top_k_labels == query_label, axis=1)  # 任意一列标签相同则相关 (True/False)
-#
-#     # Step 4: 计算 Precision 和 Recall
-#     precision_at_k = np.cumsum(relevance) / np.arange(1, k + 1)  # 累计相关个数 / 前 k 数量
-#     recall_at_k = np.cumsum(relevance) / np.sum(np.any(db_labels == query_label, axis=1))  # 累计相关个数 / 总相关个数
-#
-#     # Step 5: 计算 mAP
-#     ap = 0
-#     for i in range(k):
-#         if relevance[i]:  # 如果当前样本是相关的
-#             ap += precision_at_k[i]  # 加入 Precision 值
-#     mean_ap = ap / np.sum(relevance) if np.sum(relevance) > 0 else 0  # 平均
-#
-#     return precision_at_k, recall_at_k, mean_ap
 
-
-# # 随机从待查询图像中选取 10 张
-# np.random.seed(42)  # 固定随机种子，保证结果可复现
-# query_indices = np.random.choice(range(search_features.shape[0]), 10, replace=False)
-#
-# # 初始化存储结果的列表
-# precision_list = []
-# recall_list = []
-# mAP_list = []
-#
-# # 参数设置
-# k = 100  # 前 k 个检索结果
-#
-# # 数据库的二值化特征
-# db_binary = decompressbit(db_train_features, n_bits)  # 解压数据库特征
-# db_labels_binary = db_labels  # 数据库的标签
-#
-# for query_idx in query_indices:
-#     # 查询图像特征和标签
-#     query_feature = search_features[query_idx:query_idx + 1]
-#     query_label = search_labels[query_idx]
-#
-#     # 对查询图像进行二值化
-#     query_binary = decompressbit(compute_binary_codes(query_feature, centers, radii), n_bits)[0]
-#
-#     # 计算 Precision、Recall 和 mAP
-#     precision, recall, mAP = calculate_precision_recall_mAP(query_binary, db_binary, query_label, db_labels_binary, k)
-#
-#     # 保存结果
-#     precision_list.append(precision)
-#     recall_list.append(recall)
-#     mAP_list.append(mAP)
-#
-# # 计算 10 个查询的平均 Precision、Recall 和 mAP
-# mean_precision = np.mean(precision_list, axis=0)
-# mean_recall = np.mean(recall_list, axis=0)
-# mean_mAP = np.mean(mAP_list)
-#
-# # 输出结果
-# print(f"随机选取的 10 张查询图像的平均 mAP 值: {mean_mAP}")
-# print(f"随机选取的 10 张查询图像的平均 Precision 值 (前 {k} 个): {mean_precision}")
-# print(f"随机选取的 10 张查询图像的平均 Recall 值 (前 {k} 个): {mean_recall}")
-
-
-
-#
-# # 计算 Precision@k
-# def precision_at_k(retrieved_indices, relevant_labels, k):
-#     """
-#     计算前 K 个检索结果的精度
-#     """
-#     # 确保索引不会越界
-#     retrieved_indices = np.clip(retrieved_indices, 0, len(relevant_labels) - 1)
-#     retrieved_labels = relevant_labels[retrieved_indices[:k]]  # 获取前 K 个检索结果的标签
-#     relevant_count = np.sum(retrieved_labels == 1)  # 查找相关标签的数量
-#     precision = relevant_count / k  # 计算精度
-#     return precision
-#
-#
-# # 计算 Recall@k
-# def recall_at_k(retrieved_indices, relevant_labels, k, total_relevant):
-#     """
-#     计算前 K 个检索结果的召回率
-#     """
-#     # 确保索引不会越界
-#     retrieved_indices = np.clip(retrieved_indices, 0, len(relevant_labels) - 1)
-#     retrieved_labels = relevant_labels[retrieved_indices[:k]]  # 获取前 K 个检索结果的标签
-#     relevant_count = np.sum(retrieved_labels == 1)  # 查找相关标签的数量
-#     recall = relevant_count / total_relevant  # 计算召回率
-#     return recall
-#
-#
-# # 计算 mAP
-# def mean_average_precision(query_indices, database_binary_features, n_bits, k=10):
-#     """
-#     计算检索的 mAP
-#     """
-#     average_precisions = []
-#     for query_idx in query_indices:
-#         query_feature = database_binary_features[query_idx]
-#         sorted_indices, _ = retrieve_by_hamming(query_feature, database_binary_features,
-#                                                 np.arange(len(database_binary_features)), query_index=query_idx)
-#         relevant_labels = labels[query_idx]  # 获取查询图像的标签
-#         total_relevant = np.sum(relevant_labels)  # 相关标签的总数
-#         precision = precision_at_k(sorted_indices, relevant_labels, k)
-#         recall = recall_at_k(sorted_indices, relevant_labels, k, total_relevant)
-#
-#         # 输出 Precision@k 和 Recall@k
-#         # print(f"Query {query_idx} - Precision@{k}: {precision:.4f}, Recall@{k}: {recall:.4f}")
-#
-#         average_precisions.append(precision)
-#
-#     mAP = np.mean(average_precisions)
-#     return mAP
-#
-#
-# # 设置不同的比特长度进行测试
-# bit_lengths = [32, 64, 128]
-#
-# for n_bits in bit_lengths:
-#     print(f"\nTesting with {n_bits} bits:")
-#
-#     # 训练球面哈希
-#     centers, radii = spherical_hashing(db_features, n_bits)
-#
-#     # 计算二值码
-#     db_train_features = compute_binary_codes(db_features, centers, radii)
-#
-#     # 解压二值化特征
-#     db_binary_features = decompressbit(db_train_features, n_bits)
-#
-#     # 模拟查询
-#     query_feature = db_binary_features[0]  # 使用数据库的第一个图像作为查询图像
-#     original_indices = np.arange(len(db_binary_features))
-#
-#     # 检索
-#     sorted_indices, sorted_distances = retrieve_by_hamming(query_feature, db_binary_features, original_indices,
-#                                                            query_index=0)
-#
-#     # 输出前 10 个检索结果
-#     print("\n检索结果（前 10 个）：")
-#     for i in range(10):
-#         print(f"索引: {sorted_indices[i]}, Hamming 距离: {sorted_distances[i]}")
-#
-#     # 计算 mAP
-#     query_indices = np.random.choice(len(db_binary_features), 100)  # 随机选择 100 个查询
-#     mAP = mean_average_precision(query_indices, db_binary_features, n_bits)
-#     print(f"Mean Average Precision (mAP) for {n_bits} bits: {mAP:.4f}")
-
-import numpy as np
-
+#########################################################################
+### 主程序
 # 设置比特长度进行测试
-bit_lengths = [32, 64, 128]
+bit_lengths = [32]       # 32,64,128
 
 # 固定随机种子以保证结果可复现
 np.random.seed(42)
@@ -519,7 +350,7 @@ np.random.seed(42)
 n_query = 10
 
 # 参数设置
-k = 100  # 前 k 个检索结果
+k = 30  # 前 k 个检索结果
 
 for n_bits in bit_lengths:
     print(f"\nTesting with {n_bits} bits:")
@@ -563,8 +394,8 @@ for n_bits in bit_lengths:
 
     # 输出结果
     print(f"\n随机选取的 {n_query} 张查询图像的平均 mAP 值: {mean_mAP:.4f}")
-    print(f"随机选取的 {n_query} 张查询图像的平均 Precision 值 (前 {k} 个): {mean_precision}")
-    print(f"随机选取的 {n_query} 张查询图像的平均 Recall 值 (前 {k} 个): {mean_recall}")
+    print(f"随机选取的 {n_query} 张查询图像的平均 Precision 值 (前 {k} 个检索结果): {mean_precision}")
+    print(f"随机选取的 {n_query} 张查询图像的平均 Recall 值 (前 {k} 个检索结果): {mean_recall}")
 
     # 检索前 10 个结果（以第一张查询图像为例）
     example_query_binary = decompressbit(compute_binary_codes(search_features[query_indices[0]:query_indices[0] + 1],
@@ -573,9 +404,11 @@ for n_bits in bit_lengths:
     sorted_indices, sorted_distances = retrieve_by_hamming(example_query_binary, db_binary_features, original_indices,
                                                            query_index=query_indices[0])
 
-    print(f"\n检索结果（前 10 个） for query index {query_indices[0]}:")
-    for i in range(10):
-        print(f"索引: {sorted_indices[i]}, Hamming 距离: {sorted_distances[i]}")
+    # print(f"\n检索结果（前 10 个） for query index {query_indices[0]}:")
+    # for i in range(10):
+    #     print(f"索引: {sorted_indices[i]}, Hamming 距离: {sorted_distances[i]}")
+
+#######################################################################################
 
 
 
