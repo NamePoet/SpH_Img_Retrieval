@@ -17,7 +17,6 @@ def compactbit(b):
         cb[:, w] |= (b[:, j].astype(np.uint8) << bit_pos)  # 确保 b[:, j] 是整数
     return cb
 
-
 # 计算欧氏距离
 def dist_mat(P1, P2):
     """
@@ -31,7 +30,6 @@ def dist_mat(P1, P2):
     D = np.sqrt(X1 + X2.T - 2 * R)
     return np.real(D)
 
-
 # 初始化随机中心
 def random_center(data, n_bits):
     """
@@ -43,7 +41,6 @@ def random_center(data, n_bits):
         samples = data[np.random.choice(N, 5, replace=False)]
         centers[i, :] = np.mean(samples, axis=0)
     return centers
-
 
 # 统计计算函数
 def compute_statistics(data, centers):
@@ -67,7 +64,6 @@ def compute_statistics(data, centers):
     stddev = np.sqrt(np.mean((O2[np.triu_indices(n_bits, 1)] - avg2) ** 2))
 
     return O1, O2, radii, avg, stddev
-
 
 # 训练球面哈希
 def spherical_hashing(data, n_bits):
@@ -101,7 +97,6 @@ def spherical_hashing(data, n_bits):
     print(f"Training completed in {iter_count} iterations")
     return centers, radii
 
-
 # 二值化数据
 def compute_binary_codes(data, centers, radii):
     """
@@ -111,7 +106,6 @@ def compute_binary_codes(data, centers, radii):
     b_data = np.zeros_like(d_data, dtype=np.int32)  # 确保类型为整数
     b_data[d_data <= radii] = 1  # 根据半径生成二值化结果
     return compactbit(b_data)
-
 
 # 加载和分割数据
 data_file = "E:\\Pic_Process_2\\data.npz"
@@ -375,12 +369,6 @@ for n_query in n_query_values:
 
         # 更新结果
         update_results(results, n_query, n_bits, precision_k, recall_k, mAP_k, db_storage_time, avg_query_time)
-        # # 保存每种比特长度下的结果
-        # results[n_query][n_bits]['precision'] = precision_k
-        # results[n_query][n_bits]['recall'] = recall_k
-        # results[n_query][n_bits]['mAP'] = mAP_k
-        # results[n_query][n_bits]['db_storage_time'].append(db_storage_time)
-        # results[n_query][n_bits]['avg_query_time'].append(avg_query_time)
 
         print(f"    Results for {n_bits} bits:")
         print(f"    Precision: {precision_k}")
